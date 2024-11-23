@@ -1,4 +1,4 @@
-# main.py
+# main.py ce ci est le main 
 import os
 import whisper
 from whisper.utils import get_writer
