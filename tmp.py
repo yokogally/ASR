@@ -2,9 +2,31 @@ import os
 import whisper
 from whisper.utils import get_writer
 import jiwer  # Import for WER calculation
-
+import csv
 # Load the Whisper model
-model = whisper.load_model('base')
+model = whisper.load_model('base', device='cuda')
+
+def append_to_csv(file_name, wer, per):
+    """
+    Appends WER and PER scores to a CSV file.
+    
+    Args:
+        file_name (str): The name of the CSV file.
+        wer (float): Word Error Rate.
+        per (float): Phoneme Error Rate.
+    """
+    # If the CSV file doesn't exist, create it and write the header
+    file_exists = os.path.exists(file_name)
+    
+    with open(file_name, mode='a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        
+        # Write the header only if the file doesn't exist
+        if not file_exists:
+            writer.writerow(['audio_filename', 'wer', 'per'])
+        
+        # Append the audio filename, WER, and PER scores
+        writer.writerow([file_name, wer, per])
 
 def get_transcribe(audio: str, language: str = 'en'):
     """
@@ -134,7 +156,8 @@ def process_directory(directory: str):
                 # Save results in multiple formats
                 base_file_name = os.path.splitext(file)[0]
                 save_file(model_Transcription, base_file_name, 'txt')
-                
+
+                append_to_csv("metric", wer_score, per_score)
                 # For debugging or further use
                 #return wer_score, per_score
 
